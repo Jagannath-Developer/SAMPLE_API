@@ -17,7 +17,9 @@ app.get("/data",(req,res)=>{
 })
 app.get("/products",async(req,res)=>{
     const response=await fetch("https://fakestoreapi.com/products");
-    const data=response.json();
+    console.log(response)
+    const data= await response.json();
+    console.log(data)
     res.json({
         message:"success",
         data:data
