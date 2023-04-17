@@ -15,7 +15,14 @@ app.get("/data",(req,res)=>{
         }
     })
 })
-
+app.get("/products",async(req,res)=>{
+    const response=await fetch("https://fakestoreapi.com/products");
+    const data=response.json();
+    res.json({
+        message:"success",
+        data:data
+    })
+})
 
 app.listen(PORT,()=>{
     console.log(`Server connected at PORT ${PORT}`);
