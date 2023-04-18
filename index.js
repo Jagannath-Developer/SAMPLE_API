@@ -30,26 +30,50 @@
 //     console.log(`Server connected at PORT ${PORT}`);
 // })
 
-const WebSoket=require('ws');
-const server=new WebSoket.Server({port:'3002'});
+const express = require('express');
+const app = express();
+const WebSocket = require('ws');
 
-server.on('connection',socket=>{
-    socket.on('message',message=>{
-        console.log("recived:",message.toString())
-        // socket.send("from user:"+message);
-        // socket.send("message:"+message.toString());
-        server.clients.forEach( function (client){
-            if(client!=socket){
-                client.send(""+message);
-            }
-        })
-    })
+const wss = new WebSocket.Server({ noServer: true });
+// const server=new WebSoket.Server({port:'3002'});
+
+const server = app.listen(3002, () => {
+    console.log('Express server listening on port 3002');
+  });
+  
+  server.on('upgrade', (request, socket, head) => {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  });
+
+  wss.on('connection', function connection(ws) {
+    console.log('Client connected');
+  
+    ws.on('message', function incoming(message) {
+      console.log('Received message:', message.toString());
+    });
+  
+    ws.send('Hello, client!');
+  });
+
+// server.on('connection',socket=>{
+//     socket.on('message',message=>{
+//         console.log("recived:",message.toString())
+//         // socket.send("from user:"+message);
+//         // socket.send("message:"+message.toString());
+//         server.clients.forEach( function (client){
+//             if(client!=socket){
+//                 client.send(""+message);
+//             }
+//         })
+//     })
     
-    socket.on("open",function(){
-        console.log("open:");
-    })
-    socket.on("close",function(){
-        console.log("i lost my connection");
-    })
-    console.log("one more client is connected")
-})
+//     socket.on("open",function(){
+//         console.log("open:");
+//     })
+//     socket.on("close",function(){
+//         console.log("i lost my connection");
+//     })
+//     console.log("one more client is connected")
+// })
