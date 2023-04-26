@@ -35,6 +35,9 @@ const app = express();
 const WebSocket = require('ws');
 
 const wss = new WebSocket.Server({ noServer: true });
+app.get("/",(req,res)=>{
+  res.send("Server workers..")
+})
 
 
 // const server=new WebSoket.Server({port:'3002'});
