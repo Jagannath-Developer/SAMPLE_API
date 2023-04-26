@@ -1,87 +1,42 @@
-// const express=require('express');
-// const app=express();
-// const dotenv=require('dotenv').config();
-const PORT=process.env.PORT ||8080;
-
-// app.get("/",(req,res)=>{
-//     res.send("Welcome sample API app")
-// })
-// app.get("/data",(req,res)=>{
-//     res.json({
-//         message:"success",
-//         data:{
-//             name:"jitu",
-//             age:27
-//         }
-//     })
-// })
-// app.get("/products",async(req,res)=>{
-//     const response=await fetch("https://fakestoreapi.com/products");
-//     console.log(response)
-//     const data= await response.json();
-//     console.log(data)
-//     res.json({
-//         message:"success",
-//         data:data
-//     })
-// })
-
-// app.listen(PORT,()=>{
-//     console.log(`Server connected at PORT ${PORT}`);
-// })
-
 const express = require('express');
-const app = express();
+const http = require('http');
 const WebSocket = require('ws');
 
-const wss = new WebSocket.Server({ noServer: true });
-app.get("/",(req,res)=>{
-  res.send("Server workers..")
+
+const app = express();
+app.get('/', (req, res) => {
+  res.send("Server connected...!");
+})
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', socket => {
+  socket.on('message', message => {
+    console.log("recived:", message.toString())
+    // socket.send("from user:"+message);
+    // socket.send("message:"+message.toString());
+    wss.clients.forEach(function(client) {
+      if (client != socket) {
+        client.send("" + message);
+      }
+    })
+  })
+
+  socket.on("open", function() {
+    console.log("open:");
+  })
+  socket.on("close", function() {
+    console.log("i lost my connection");
+  })
+  // console.log("one more client is connected")
+})
+app.get("/data", async (req, res) => {
+  wss.send("Hello world Jitu")
+
+  res.send("Data send");
+
 })
 
-
-// const server=new WebSoket.Server({port:'3002'});
-
-const server = app.listen(PORT, () => {
-  console.log(`Server run at PORT ${PORT} `);
-})
-server.on('upgrade', (request, socket, head) => {
-  wss.handleUpgrade(request, socket, head, (ws) => {
-    wss.emit('connection', ws, request);
-  });
+server.listen(3000, () => {
+  console.log(`Listening on port `);
 });
-
-wss.on('connection', function connection(ws) {
-  console.log('Client connected');
-
-  ws.on('message', function incoming(message) {
-    console.log('recived:', message.toString());
-    wss.clients.forEach( function (client){
-          if(client!=ws){
-              client.send(""+message);
-          }
-      })
-  });
-
-  // ws.send('Hello, client!');
-});
-// server.on('connection',socket=>{
-//     socket.on('message',message=>{
-//         console.log("recived:",message.toString())
-//         // socket.send("from user:"+message);
-//         // socket.send("message:"+message.toString());
-//         server.clients.forEach( function (client){
-//             if(client!=socket){
-//                 client.send(""+message);
-//             }
-//         })
-//     })
-    
-//     socket.on("open",function(){
-//         console.log("open:");
-//     })
-//     socket.on("close",function(){
-//         console.log("i lost my connection");
-//     })
-//     console.log("one more client is connected")
-// })
